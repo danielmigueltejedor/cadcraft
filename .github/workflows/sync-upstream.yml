@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: sync-upstream-main
@@ -26,6 +27,8 @@ jobs:
 
       - name: Integrate upstream without rewriting commits
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -47,4 +50,9 @@ jobs:
             fi
           fi
 
+          # Pin the dispatch to the synced commit, even if main advances again.
+          synced_sha=$(git rev-parse HEAD)
+          ci_ref="sync-ci-${synced_sha}"
           git push origin HEAD:main
+          git push origin "HEAD:refs/tags/${ci_ref}"
+          gh workflow run ci.yml --ref "${ci_ref}"
