@@ -355,12 +355,15 @@ impl Formatted {
     }
 
     /// Remove the tab stop nearest `pos` (within `tolerance`) from the paragraphs `range` touches.
-    pub fn remove_tab(&mut self, range: std::ops::Range<usize>, pos: f64, tolerance: f64) {
+    pub fn remove_tab(&mut self, range: std::ops::Range<usize>, pos: f64, tolerance: f64, height: f64) -> bool {
+        let removed = std::cell::Cell::new(false);
         self.edit_paras(range, |p| {
-            if let Some(i) = p.tabs.iter().position(|(t, _)| (t - pos).abs() <= tolerance) {
+            if let Some(i) = p.tabs.iter().position(|(t, _)| (p.length(*t, 3, height) - pos).abs() <= tolerance) {
                 p.tabs.remove(i);
+                removed.set(true);
             }
         });
+        removed.get()
     }
 
     /// Make the paragraphs `range` touches a list: a hanging indent of `indent` drawing units
@@ -556,8 +559,18 @@ mod tests {
         f.make_list(0..f.len(), ListStyle::Number, 3.0);
         assert_eq!(f.text(), "1.\tone\n2.\ttwo");
         assert_eq!(f.to_contents(), "\\pi-3,l3,t3;1.\tone\\P2.\ttwo");
-        f.remove_tab(0..f.len(), 3.0, 0.1);
+        assert!(f.remove_tab(0..f.len(), 3.0, 0.1, 1.0));
         assert!(!f.to_contents().contains("t3"));
+    }
+
+    #[test]
+    fn missed_relative_tab_removal_keeps_original_units() {
+        let mut f = Formatted::from_contents("\\pxi-1,l2,t2;one");
+        let original = f.to_contents();
+        assert!(!f.remove_tab(0..0, 40.0, 0.1, 2.0));
+        assert_eq!(f.to_contents(), original);
+        assert!(f.remove_tab(0..0, 4.0, 0.1, 2.0));
+        assert!(!f.to_contents().contains("t2"));
     }
 
     #[test]
