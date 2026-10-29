@@ -77,10 +77,10 @@ fn tag(r: &RawTag) -> Tag {
         Kind::Real => v.parse::<f64>().ok().filter(|x| x.is_finite()).map(Value::Real),
         Kind::Int16 | Kind::Int32 | Kind::Int64 => v.parse::<i64>().ok().map(Value::Int),
         Kind::Bool => v.parse::<i64>().ok().map(|x| Value::Bool(x != 0)),
-        Kind::Hex => Some(Value::Hex(v.to_string())),
+        Kind::Hex => Some(Value::Hex(v.into())),
         Kind::Str => None,
     };
-    Tag::new(r.code, value.unwrap_or_else(|| Value::Str(r.value.clone())))
+    Tag::new(r.code, value.unwrap_or_else(|| Value::Str(r.value.clone().into())))
 }
 
 /// A handle value we believe: hexadecimal and not null. DXF handles are up to 16 hex digits and
@@ -324,7 +324,7 @@ fn put_xdata(d: &mut Drawing, mut xdata: HashMap<Handle, Vec<RawTag>>) {
 }
 
 /// Keep what `secs` holds that the reader did not model in `d.foreign`.
-pub(crate) fn read(secs: &[Section], d: &mut Drawing) {
+pub(crate) fn read(secs: &[Section<&[Tag]>], d: &mut Drawing) {
     let get = |name: &str| secs.iter().find(|s| s.name == name).map(|s| split(&s.tags)).unwrap_or_default();
     let (classes, tables, blocks, entities, objects) = (get("CLASSES"), get("TABLES"), get("BLOCKS"), get("ENTITIES"), get("OBJECTS"));
     // The drawing's entities by handle: whether each is of a type CADCraft doesn't model.

@@ -9,7 +9,7 @@ use cadcraft_doc::{
     Linetype, Lineweight, LwPolyline, MAX_FRAME_CHARS, MLeaderStyle, MText, MultilineAttrib, NamedView, PageSetup, Point, Polyline3d, RawTag,
     RayLine, Solid, Table, TableCell, Text, TextStyle, Tolerance, Transparency, Ucs, Unknown, VAlign, Viewport, VportConfig, VportTile, Wipeout,
 };
-use cadcraft_dxf::{Tag, records, sections};
+use cadcraft_dxf::{Tag, records, section_slices};
 use cadcraft_geom::{PolyVertex, Spline, Vec2, Vec3};
 
 use crate::{IoError, Result};
@@ -78,7 +78,7 @@ type LayoutDef = (String, u32, String, PageSetup);
 /// Import DXF sections while sharing one materialized-table-cell budget across blocks and entity sections.
 fn read_budgeted(bytes: &[u8], mut table_cells_left: usize) -> Result<Drawing> {
     let tags = cadcraft_dxf::parse(bytes).map_err(|e| IoError::Format(e.to_string()))?;
-    let secs = sections(&tags);
+    let secs = section_slices(&tags);
     if secs.is_empty() {
         return Err(IoError::Format("no sections found".into()));
     }

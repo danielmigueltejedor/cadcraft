@@ -5,7 +5,9 @@ use std::sync::Arc;
 
 use cadcraft_doc::{Drawing, Handle};
 use egui::epaint::{RectShape, TessellationOptions, Tessellator};
-use egui::{Color32, Mesh, Painter, Pos2, Rect, Shape, Stroke, StrokeKind, vec2};
+use egui::{Color32, Mesh, Painter, Pos2, Rect, Shape, Stroke, StrokeKind};
+#[cfg(test)]
+use egui::vec2;
 
 use super::Xf;
 use crate::theme::Tokens;
@@ -21,7 +23,7 @@ struct Mark {
 }
 
 #[derive(Default)]
-pub(super) struct Cache {
+pub(crate) struct Cache {
     key: Option<Key>,
     selection: Vec<Handle>,
     mesh: Option<Arc<Mesh>>,
@@ -29,7 +31,7 @@ pub(super) struct Cache {
 }
 
 impl Cache {
-    pub(super) fn paint(
+    pub(crate) fn paint(
         &mut self,
         d: &Drawing,
         uid: u64,

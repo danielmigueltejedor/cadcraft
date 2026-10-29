@@ -30,7 +30,7 @@ use draw::{draw_drag_gpu, draw_highlight_gpu, draw_list_gpu, list_mesh_key, sele
 use dyn_boxes::dynamic_input;
 pub(crate) use dyn_boxes::length_units;
 use grid::draw_grid;
-use grips::{click_grip, grip_at, grip_menu, grip_options, grip_rect};
+use grips::{click_grip, grip_at, grip_menu, grip_options};
 use list::{PrimIndex, ensure_list, rebuilt_preview};
 #[cfg(test)]
 use list::{preview_options, prims_of};
