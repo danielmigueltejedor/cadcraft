@@ -1,0 +1,35 @@
+name: Temporary upstream merge-conflict probe
+on:
+  push:
+    branches: [upstream/cadcraft-dwg-layouts-20261029]
+permissions:
+  contents: read
+jobs:
+  probe:
+    if: contains(github.event.head_commit.message, 'probe fork main against upstream')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect upstream conflicts without modifying any branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.email "quality@users.noreply.github.com"
+          git config user.name "Quality Probe"
+          git fetch --no-tags origin main:refs/remotes/origin/fork-main
+          echo "Current clean upstream base $(git rev-parse HEAD)"
+          echo "Fork tip $(git rev-parse origin/fork-main)"
+          if git merge --no-commit --no-ff origin/fork-main; then
+            echo "MERGE_PROBE_CLEAN"
+            git diff --cached --stat | tail -45
+            git merge --abort
+          else
+            echo "MERGE_PROBE_CONFLICTS"
+            git diff --name-only --diff-filter=U
+            git status --short | tail -80
+            git merge --abort || true
+            exit 1
+          fi
