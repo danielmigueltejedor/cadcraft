@@ -42,6 +42,8 @@ mod mtext_columns_roundtrip;
 mod mtext_embedded_object;
 mod mtext_line_spacing;
 mod multiline_attributes;
+#[cfg(not(target_arch = "wasm32"))]
+mod native_cad_layout;
 mod paperview_marker;
 mod passthrough_image_roundtrip;
 mod pdf_followups;
@@ -64,10 +66,8 @@ mod table_cellstyle_roundtrip;
 mod tables_objects_roundtrip;
 mod text_left_justify;
 mod tolerance_roundtrip;
+mod unvisited_layout;
 mod user_lin_pat_roundtrip;
 mod view_tables_roundtrip;
 mod viewport_clip_roundtrip;
 mod xref_roundtrip;
-#[cfg(not(target_arch = "wasm32"))]
-mod native_cad_layout;
-mod unvisited_layout;

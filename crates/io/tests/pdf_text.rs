@@ -95,11 +95,7 @@ fn test_font(fs_type: u16, metrics: usize, alias: bool) -> Vec<u8> {
     // cmap: format 4, 'A'..'B' → 1..2.
     let mut sub = Vec::new();
     let segs = if alias {
-        vec![
-            (0x41, 0x41, 1u16.wrapping_sub(0x41)),
-            (0x42, 0x42, 1u16.wrapping_sub(0x42)),
-            (0xFFFF, 0xFFFF, 1),
-        ]
+        vec![(0x41, 0x41, 1u16.wrapping_sub(0x41)), (0x42, 0x42, 1u16.wrapping_sub(0x42)), (0xFFFF, 0xFFFF, 1)]
     } else {
         vec![(0x41, 0x42, 1u16.wrapping_sub(0x41)), (0xFFFF, 0xFFFF, 1)]
     };
@@ -268,12 +264,7 @@ fn shared_glyphs_keep_each_occurrences_original_unicode_text() {
     let cmap = pdf_read::to_unicode_map(font.to_unicode.as_deref().expect("ToUnicode CMap"));
     let copied = glyph_codes
         .iter()
-        .map(|code| {
-            cmap.iter()
-                .find(|(mapped, _)| mapped == code)
-                .map(|(_, value)| value.as_str())
-                .expect("every visible glyph has copied Unicode")
-        })
+        .map(|code| cmap.iter().find(|(mapped, _)| mapped == code).map(|(_, value)| value.as_str()).expect("every visible glyph has copied Unicode"))
         .collect::<String>();
     assert_eq!(copied, "ABBA", "equal glyph outlines must preserve each original character");
 }
