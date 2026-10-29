@@ -1,3 +1,6 @@
+mod cache;
+pub(super) use cache::Cache;
+
 use super::{CadApp, Handle, Input, Pos2, Rect, Xf, vec2};
 
 /// A click on grip `g` (idle): Shift+click makes it hot or cold again; a plain click starts
