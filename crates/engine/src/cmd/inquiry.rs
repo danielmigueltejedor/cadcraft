@@ -281,7 +281,8 @@ fn entity_z(e: &Entity, p: Vec2) -> Option<f64> {
         // Read in world coordinates already.
         EntityKind::Circle(c) => Some(c.center.z),
         EntityKind::Arc(a) => Some(a.center.z),
-        EntityKind::Text(t) | EntityKind::AttDef(cadcraft_doc::Attrib { text: t, .. }) => Some(t.insert.z),
+        EntityKind::Text(t) => Some(t.insert.z),
+        EntityKind::AttDef(a) => Some(a.text.insert.z),
         EntityKind::MText(t) => Some(t.insert.z),
         EntityKind::Insert(i) => Some(i.insert.z),
         EntityKind::Face3d(f) => face_z(&f.corners, p).or_else(|| along(&f.corners, true)),
