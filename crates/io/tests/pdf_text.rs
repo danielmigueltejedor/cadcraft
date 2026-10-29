@@ -229,11 +229,7 @@ fn font_files(doc: &Doc) -> usize {
 
 #[test]
 fn font_paths_use_the_same_installed_face_and_preserve_the_drawing_style() {
-    for path in [
-        r"C:\Windows\Fonts\CADCRAFT-PDF-TEST.TTF",
-        "/old machine/fonts/cadcraft-pdf-test.ttf",
-        r"..\Fonts\cadcraft-pdf-test.ttf",
-    ] {
+    for path in [r"C:\Windows\Fonts\CADCRAFT-PDF-TEST.TTF", "/old machine/fonts/cadcraft-pdf-test.ttf", r"..\Fonts\cadcraft-pdf-test.ttf"] {
         let mut d = drawing();
         style(&mut d, "Portable", path);
         text(&mut d, &Space::Model, "Portable", (10.0, 20.0), "AB", 0.3, 0.8, 0.2);

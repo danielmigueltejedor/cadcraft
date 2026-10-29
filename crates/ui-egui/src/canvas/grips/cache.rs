@@ -5,9 +5,9 @@ use std::sync::Arc;
 
 use cadcraft_doc::{Drawing, Handle};
 use egui::epaint::{RectShape, TessellationOptions, Tessellator};
-use egui::{Color32, Mesh, Painter, Pos2, Rect, Shape, Stroke, StrokeKind};
 #[cfg(test)]
 use egui::vec2;
+use egui::{Color32, Mesh, Painter, Pos2, Rect, Shape, Stroke, StrokeKind};
 
 use super::Xf;
 use crate::theme::Tokens;
