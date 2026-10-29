@@ -35,7 +35,7 @@ pub(super) fn run_ordinate(s: &mut Session, p: &Value) -> Result<Value> {
 fn last_linear(s: &Session) -> Option<Dimension> {
     let h = s.last_dim?;
     match &s.doc().ok()?.entity(h)?.kind {
-        EntityKind::Dimension(d) if matches!(d.kind, DimKind::Linear { .. } | DimKind::Aligned) => Some(d.clone()),
+        EntityKind::Dimension(d) if matches!(d.kind, DimKind::Linear { .. } | DimKind::Aligned) => Some((**d).clone()),
         _ => None,
     }
 }
@@ -65,7 +65,7 @@ fn chained(s: &Session, prev: &Dimension, next: Vec2, baseline: bool) -> EntityK
         let side = if (defpt - prev.p13.xy()).dot(n) >= 0.0 { 1.0 } else { -1.0 };
         defpt += n * (spacing * side);
     }
-    EntityKind::Dimension(Dimension {
+    EntityKind::Dimension(Box::new(Dimension {
         p13: v3(first),
         p14: v3(next),
         defpt: v3(defpt),
@@ -75,7 +75,7 @@ fn chained(s: &Session, prev: &Dimension, next: Vec2, baseline: bool) -> EntityK
         marks: Default::default(),
         user_text_pos: false,
         ..prev.clone()
-    })
+    }))
 }
 
 /// Most dimensions one DIMCONTINUE/DIMBASELINE call adds.

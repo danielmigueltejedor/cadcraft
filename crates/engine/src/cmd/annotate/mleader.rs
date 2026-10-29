@@ -17,7 +17,7 @@ fn mleader_kind(s: &Session, pts: &[Vec2], text: &str, landing: bool) -> Option<
     let attach = if dir > 0.0 { 4 } else { 6 };
     let dogleg = if landing { st.dogleg } else { 0.0 };
     let tpos = *landing_pt + Vec2::new((dogleg + st.landing_gap) * dir, 0.0);
-    Some(EntityKind::MLeader(MLeader {
+    Some(EntityKind::MLeader(Box::new(MLeader {
         leaders: vec![arrow_pts.iter().map(|p| v3(*p)).collect()],
         landing: v3(*landing_pt),
         dogleg,
@@ -37,7 +37,7 @@ fn mleader_kind(s: &Session, pts: &[Vec2], text: &str, landing: bool) -> Option<
         arrow_size: st.arrow_size,
         spline: false,
         block: None,
-    }))
+    })))
 }
 
 pub(super) fn run_mleader(s: &mut Session, p: &Value) -> Result<Value> {

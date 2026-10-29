@@ -135,7 +135,7 @@ pub(super) fn entity_with_table_budget(kind: &str, tags: &[Tag], table_cells_lef
         "XLINE" => EntityKind::XLine(RayLine { base: t.p(10), dir: t.p(11) }),
         "TEXT" => EntityKind::Text(text_from(&t)),
         "MTEXT" => EntityKind::MText(mtext_from(tags, &c)),
-        "ATTDEF" => EntityKind::AttDef(attdef(tags, &c)),
+        "ATTDEF" => EntityKind::AttDef(Box::new(attdef(tags, &c))),
         "INSERT" => {
             // A mirrored block reference comes with extrusion (0,0,-1): its insertion point, scale,
             // rotation and column spacing are in that OCS, where x runs the other way. In the WCS that
@@ -180,7 +180,7 @@ pub(super) fn entity_with_table_budget(kind: &str, tags: &[Tag], table_cells_lef
                 8 => DimKind::ArcLength,
                 _ => DimKind::Aligned,
             };
-            EntityKind::Dimension(Dimension {
+            EntityKind::Dimension(Box::new(Dimension {
                 kind,
                 defpt: t.p(10),
                 // The text midpoint is the one OCS point of a DIMENSION.
@@ -198,7 +198,7 @@ pub(super) fn entity_with_table_budget(kind: &str, tags: &[Tag], table_cells_lef
                 overrides: Default::default(),
                 assoc: Vec::new(),
                 marks: Default::default(),
-            })
+            }))
         }
         "LEADER" => EntityKind::Leader(Leader {
             vertices: t.pts(10).into_iter().map(|p| p.to3(0.0)).collect(),
@@ -207,7 +207,7 @@ pub(super) fn entity_with_table_budget(kind: &str, tags: &[Tag], table_cells_lef
             style: t.s(3).unwrap_or_else(|| "Standard".into()),
         }),
         // Names behind handles follow in `entity_extras` and `Objects::apply`.
-        "MULTILEADER" | "MLEADER" => EntityKind::MLeader(crate::dxf_mleader::read(tags)),
+        "MULTILEADER" | "MLEADER" => EntityKind::MLeader(Box::new(crate::dxf_mleader::read(tags))),
         "SOLID" | "TRACE" => {
             let corners = [t.p(10), t.p(11), t.p(12), if t.f(13).is_some() { t.p(13) } else { t.p(12) }];
             let corners = corners.map(|p| ocs(&c, p));
@@ -229,7 +229,7 @@ pub(super) fn entity_with_table_budget(kind: &str, tags: &[Tag], table_cells_lef
             }
             k
         }
-        "ACAD_TABLE" => EntityKind::Table(acad_table(tags, table_cells_left)),
+        "ACAD_TABLE" => EntityKind::Table(Box::new(acad_table(tags, table_cells_left))),
         "VIEWPORT" => EntityKind::Viewport(Viewport {
             center: t.p(10),
             width: t.fd(40, 1.0),

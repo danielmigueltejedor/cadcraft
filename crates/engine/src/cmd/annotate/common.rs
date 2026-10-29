@@ -5,7 +5,7 @@ pub(super) fn style(s: &Session) -> String {
 }
 
 pub(super) fn dim(s: &Session, kind: DimKind, defpt: Vec2, p13: Vec2, p14: Vec2, p15: Vec2, text: &str) -> EntityKind {
-    EntityKind::Dimension(Dimension {
+    EntityKind::Dimension(Box::new(Dimension {
         kind,
         defpt: v3(defpt),
         text_mid: Vec3::ZERO,
@@ -22,7 +22,7 @@ pub(super) fn dim(s: &Session, kind: DimKind, defpt: Vec2, p13: Vec2, p14: Vec2,
         overrides: s.doc().map(|d| d.dim_overrides()).unwrap_or_default(),
         assoc: Vec::new(),
         marks: Default::default(),
-    })
+    }))
 }
 
 /// Horizontal (0) or vertical (90°) from where the dimension line is placed (AutoCAD's rule).
