@@ -70,7 +70,8 @@ rfd = "0.17"
 arboard = { version = "3.6", default-features = false }
 
 [workspace.lints.rust]
-unsafe_code = "forbid"
+# The macOS Finder bridge audits its narrow Objective-C unsafe boundary separately.
+unsafe_code = "deny"
 
 [workspace.lints.clippy]
 cognitive_complexity = "deny"
