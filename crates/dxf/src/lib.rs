@@ -607,13 +607,18 @@ fn code_page_bytes(c: char, d: codepage::Decoder, before_escape: bool, out: &mut
 
 /// A section: `0 SECTION / 2 NAME ... 0 ENDSEC`.
 #[derive(Clone, Debug, Default)]
-pub struct Section {
+pub struct Section<T = Vec<Tag>> {
     pub name: String,
-    pub tags: Vec<Tag>,
+    pub tags: T,
 }
 
-/// Split a tag stream into sections.
+/// Retain the existing owned interface for callers which need to modify sections.
 pub fn sections(tags: &[Tag]) -> Vec<Section> {
+    section_slices(tags).into_iter().map(|s| Section { name: s.name, tags: s.tags.to_vec() }).collect()
+}
+
+/// Borrow section contents without cloning the entire parsed tag stream.
+pub fn section_slices(tags: &[Tag]) -> Vec<Section<&[Tag]>> {
     let mut out = Vec::new();
     let mut i = 0;
     while i < tags.len() {
@@ -625,7 +630,7 @@ pub fn sections(tags: &[Tag]) -> Vec<Section> {
             while j < tags.len() && !(tags.get(j).is_some_and(|t| t.code == 0 && t.str() == "ENDSEC")) {
                 j += 1;
             }
-            out.push(Section { name, tags: tags.get(start..j).unwrap_or(&[]).to_vec() });
+            out.push(Section { name, tags: tags.get(start..j).unwrap_or(&[]) });
             i = j + 1;
         } else {
             i += 1;
@@ -636,20 +641,46 @@ pub fn sections(tags: &[Tag]) -> Vec<Section> {
 
 /// Split a run of tags into records starting at each code-0 tag: (type, tags after the 0).
 pub fn records(tags: &[Tag]) -> Vec<(String, Vec<Tag>)> {
-    let mut out: Vec<(String, Vec<Tag>)> = Vec::new();
-    for t in tags {
-        if t.code == 0 {
-            out.push((t.str(), Vec::new()));
-        } else if let Some(last) = out.last_mut() {
-            last.1.push(t.clone());
+    record_slices(tags).into_iter().map(|(k, t)| (k, t.to_vec())).collect()
+}
+
+/// Borrow the tags within each record; the final record need not have a terminator.
+pub fn record_slices(tags: &[Tag]) -> Vec<(String, &[Tag])> {
+    let mut out = Vec::new();
+    let mut open: Option<(String, usize)> = None;
+    for (i, t) in tags.iter().enumerate() {
+        if t.code != 0 { continue; }
+        if let Some((kind, start)) = open.take() {
+            out.push((kind, tags.get(start..i).unwrap_or(&[])));
         }
+        open = Some((t.str(), i + 1));
+    }
+    if let Some((kind, start)) = open {
+        out.push((kind, tags.get(start..).unwrap_or(&[])));
     }
     out
 }
 
+
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn borrowed_sections_and_records_retain_original_tags() {
+        let tags = vec![Tag::s(0, "SECTION"), Tag::s(2, "ENTITIES"), Tag::s(0, "LINE"), Tag::f(10, 1.0), Tag::s(0, "ENDSEC")];
+        let sec = section_slices(&tags);
+        assert_eq!(sec.len(), 1);
+        assert_eq!(sec[0].tags.as_ptr(), tags[2..4].as_ptr());
+        let recs = record_slices(sec[0].tags);
+        assert_eq!(recs.len(), 1);
+        assert_eq!(recs[0].0, "LINE");
+        assert_eq!(recs[0].1.as_ptr(), tags[3..4].as_ptr());
+        assert_eq!(sections(&tags)[0].tags, sec[0].tags);
+        assert_eq!(records(sec[0].tags)[0].1, recs[0].1);
+    }
 
     #[test]
     fn literal_escape_text_roundtrips() {
