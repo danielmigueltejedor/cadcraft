@@ -115,10 +115,11 @@ pub fn tags(d: &Drawing, version: Version) -> Vec<Tag> {
     tags_for(d, version, version)
 }
 
-/// The R2000 DXF the DWG bridge converts to a `dwg` version DWG: its entity types are the DWG
-/// version's (MULTILEADER from 2007).
+/// The source-version DXF used for DWG conversion. Preserved foreign records must be
+/// decoded at their original version, not unconditionally as R2000; generated entity
+/// types still follow the requested DWG version (MULTILEADER from 2007).
 pub(crate) fn dwg_bridge(d: &Drawing, dwg: Version) -> String {
-    let mut tags = tags_for(d, Version::R2000, dwg);
+    let mut tags = tags_for(d, crate::save_version(d), dwg);
     bridge_markers(&mut tags);
     cadcraft_dxf::write_ascii(&tags)
 }
