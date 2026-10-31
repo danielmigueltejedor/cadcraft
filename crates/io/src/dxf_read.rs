@@ -9,7 +9,7 @@ use cadcraft_doc::{
     Linetype, Lineweight, LwPolyline, MAX_FRAME_CHARS, MLeaderStyle, MText, MultilineAttrib, NamedView, PageSetup, Point, Polyline3d, RawTag,
     RayLine, Solid, Table, TableCell, Text, TextStyle, Tolerance, Transparency, Ucs, Unknown, VAlign, Viewport, VportConfig, VportTile, Wipeout,
 };
-use cadcraft_dxf::{Tag, records, section_slices as sections};
+use cadcraft_dxf::{Tag, record_slices as records, section_slices as sections};
 use cadcraft_geom::{PolyVertex, Spline, Vec2, Vec3};
 
 use crate::{IoError, Result};

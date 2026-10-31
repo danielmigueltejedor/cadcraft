@@ -4,7 +4,7 @@ use super::objects::{MAX_OBJECTS, Objects, page_setup};
 use super::{Block, BlockDef, Drawing, Entity, EntityKind, Handle, HashMap, Layout, LayoutDef, Rx, Tag, records};
 
 pub(super) fn parse_entities(
-    recs: &[(String, Vec<Tag>)],
+    recs: &[(String, &[Tag])],
     d: &mut Drawing,
     rx: &mut Rx,
     skipped: &mut usize,

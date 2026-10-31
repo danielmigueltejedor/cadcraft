@@ -493,7 +493,7 @@ pub(super) fn entity_extras(kind: &str, tags: &[Tag], h: Handle, k: &mut EntityK
 /// can't be placed are counted in `skipped`.
 /// The entity of a POLYLINE, with its mesh faces (advancing `i` past its VERTEX records). `None`
 /// for a mesh without faces.
-pub(super) fn polyline_entity(recs: &[(String, Vec<Tag>)], i: &mut usize, t: &T) -> Option<(Common, EntityKind, Vec<EntityKind>)> {
+pub(super) fn polyline_entity(recs: &[(String, &[Tag])], i: &mut usize, t: &T) -> Option<(Common, EntityKind, Vec<EntityKind>)> {
     let flags = t.i(70).unwrap_or(0);
     let mut pts: Vec<(Vec3, f64, f64, f64)> = Vec::new();
     // Polyface face records (VERTEX 70 bit 128 without 64): vertex indices 71–74.
@@ -542,7 +542,7 @@ pub(super) fn polyline_entity(recs: &[(String, Vec<Tag>)], i: &mut usize, t: &T)
 }
 
 /// The ATTRIB records after an INSERT, advancing `i` past them and their SEQEND.
-pub(super) fn insert_attribs(recs: &[(String, Vec<Tag>)], i: &mut usize, ins_layer: &str) -> Vec<Attrib> {
+pub(super) fn insert_attribs(recs: &[(String, &[Tag])], i: &mut usize, ins_layer: &str) -> Vec<Attrib> {
     let mut attribs = Vec::new();
     while let Some((k2, t2)) = recs.get(*i) {
         if k2 == "ATTRIB" {
@@ -551,7 +551,7 @@ pub(super) fn insert_attribs(recs: &[(String, Vec<Tag>)], i: &mut usize, ins_lay
             let (own, embedded) = split_embedded(t2);
             let multiline = multiline_attrib(embedded, &common(&tt));
             let own = T(own);
-            let mut text = text_from(&own);
+            let mut text = text_from(&own, true);
             if let Some(m) = &multiline {
                 text.value.clone_from(&m.read_as);
             }
