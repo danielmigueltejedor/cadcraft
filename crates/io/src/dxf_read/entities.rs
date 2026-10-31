@@ -115,6 +115,15 @@ fn spline(t: &T) -> Spline {
     sp
 }
 
+/// An untwisted top-down DXF viewport stores its centre relative to group 17 (WCS target).
+/// Twisted/3D views are left unchanged until the viewport model supports their projection.
+fn viewport_center(t: &T) -> Vec2 {
+    let center = Vec2::new(t.fd(12, 0.0), t.fd(22, 0.0));
+    let dir = Vec3::new(t.fd(16, 0.0), t.fd(26, 0.0), t.fd(36, 1.0));
+    let top = dir.is_finite() && dir.z > 0.0 && (dir.x / dir.z).abs() < 1e-12 && (dir.y / dir.z).abs() < 1e-12;
+    if top && t.fd(51, 0.0).abs() < 1e-12 { center + t.p(17).xy() } else { center }
+}
+
 pub(super) fn entity_with_table_budget(kind: &str, tags: &[Tag], table_cells_left: &mut usize) -> Option<(Common, EntityKind)> {
     // The paper-space viewport our writer adds (dxf_write::paper_view) stays implicit.
     if kind == "VIEWPORT" && crate::dxf_ext::is_paper_view(tags) {
@@ -133,7 +142,7 @@ pub(super) fn entity_with_table_budget(kind: &str, tags: &[Tag], table_cells_lef
         "HELIX" => EntityKind::Helix(helix(tags)),
         "RAY" => EntityKind::Ray(RayLine { base: t.p(10), dir: t.p(11) }),
         "XLINE" => EntityKind::XLine(RayLine { base: t.p(10), dir: t.p(11) }),
-        "TEXT" => EntityKind::Text(text_from(&t)),
+        "TEXT" => EntityKind::Text(text_from(&t, false)),
         "MTEXT" => EntityKind::MText(mtext_from(tags, &c)),
         "ATTDEF" => EntityKind::AttDef(attdef(tags, &c)),
         "INSERT" => {
@@ -244,7 +253,7 @@ pub(super) fn entity_with_table_budget(kind: &str, tags: &[Tag], table_cells_lef
             center: t.p(10),
             width: t.fd(40, 1.0),
             height: t.fd(41, 1.0),
-            view_center: Vec2::new(t.fd(12, 0.0), t.fd(22, 0.0)),
+            view_center: viewport_center(&t),
             view_height: t.fd(45, 1.0),
             id: t.i(69).unwrap_or(0) as u32,
             locked: t.i(90).unwrap_or(0) & 16384 != 0,
