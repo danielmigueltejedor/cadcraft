@@ -73,7 +73,7 @@ pub fn read(bytes: &[u8]) -> Result<Drawing> {
 type BlockDef = (String, Vec3, String, Vec<(Option<String>, bool, Entity)>, i64);
 
 /// A layout read from OBJECTS: name, tab order, paper block handle and page setup.
-type LayoutDef = (String, u32, String, PageSetup);
+type LayoutDef = (String, u32, String, PageSetup, bool);
 
 /// Import DXF sections while sharing one materialized-table-cell budget across blocks and entity sections.
 fn read_budgeted(bytes: &[u8], table_cells_left: usize) -> Result<Drawing> {
@@ -134,6 +134,8 @@ fn read_tags_budgeted(tags: &[Tag], mut table_cells_left: usize) -> Result<Drawi
     let (paper_block_for, first_layout) = setup_layouts(&mut d, &mut layout_objs, &rx);
     place_blocks(&mut d, blocks, &mut rx, &paper_block_for, &first_layout);
     place_entities(&mut d, entities, &rx, &paper_block_for, &first_layout);
+    // A native blank layout with content should not be initialized again on activation.
+    for l in &mut d.layouts { l.needs_initialization &= l.entities.is_empty(); }
     apply_sortents(&mut d, &objs.sortents, &rx.brs, &paper_block_for, &first_layout);
     objs.apply(&mut d, &rx);
     crate::dxf_image::resolve(&secs, &mut d);

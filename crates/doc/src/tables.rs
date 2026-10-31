@@ -838,11 +838,14 @@ pub struct Layout {
     /// Saved paper-space view (centre, height).
     #[serde(default)]
     pub view: Option<(Vec2, f64)>,
+    /// Native unconfigured layout which gets a default viewport only on first activation.
+    #[serde(default)]
+    pub needs_initialization: bool,
 }
 
 impl Layout {
     pub fn new(name: &str, tab_order: u32) -> Self {
-        Layout { name: name.into(), tab_order, page: PageSetup::default(), entities: EntityStore::new(), view: None }
+        Layout { name: name.into(), tab_order, page: PageSetup::default(), entities: EntityStore::new(), view: None, needs_initialization: false }
     }
 }
 

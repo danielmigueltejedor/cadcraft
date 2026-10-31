@@ -285,6 +285,9 @@ fn run_layout_set(s: &mut Session, p: &Value) -> Result<Value> {
     // Keep the initial page view framed around the positioned sheet, not (0, 0).
     let (width, height) = s.viewport_px;
     let aspect = if width.is_finite() && height.is_finite() && width > 0.0 && height > 0.0 { (width / height).clamp(1e-6, 1e6) } else { 1.5 };
+    if let Space::Paper(n) = &space {
+        super::layout::initialize(s, n)?;
+    }
     s.pending_window = None;
     let st = s.state_mut()?;
     st.space = space.clone();
