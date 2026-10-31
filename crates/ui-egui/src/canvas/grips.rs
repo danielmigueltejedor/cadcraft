@@ -100,7 +100,7 @@ pub(super) fn grip_at(app: &CadApp, xf: &Xf, hover: Option<Pos2>) -> Option<(Han
     None
 }
 
-//! Cache the original grip rectangles: pointer movement changes colours, not their geometry.
+// Cache grip rectangles: pointer movement changes colours, not their geometry.
 
 use std::ops::Range;
 use std::sync::Arc;
