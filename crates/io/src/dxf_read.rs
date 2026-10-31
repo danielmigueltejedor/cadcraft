@@ -76,9 +76,18 @@ type BlockDef = (String, Vec3, String, Vec<(Option<String>, bool, Entity)>, i64)
 type LayoutDef = (String, u32, String, PageSetup);
 
 /// Import DXF sections while sharing one materialized-table-cell budget across blocks and entity sections.
-fn read_budgeted(bytes: &[u8], mut table_cells_left: usize) -> Result<Drawing> {
+fn read_budgeted(bytes: &[u8], table_cells_left: usize) -> Result<Drawing> {
     let tags = cadcraft_dxf::parse(bytes).map_err(|e| IoError::Format(e.to_string()))?;
-    let secs = sections(&tags);
+    read_tags_budgeted(&tags, table_cells_left)
+}
+
+/// Parse already-decoded DXF tags; DWG import can release its large intermediate DXF first.
+pub(crate) fn read_tags(tags: &[Tag]) -> Result<Drawing> {
+    read_tags_budgeted(tags, 4_000_000)
+}
+
+fn read_tags_budgeted(tags: &[Tag], mut table_cells_left: usize) -> Result<Drawing> {
+    let secs = sections(tags);
     if secs.is_empty() {
         return Err(IoError::Format("no sections found".into()));
     }
@@ -103,7 +112,7 @@ fn read_budgeted(bytes: &[u8], mut table_cells_left: usize) -> Result<Drawing> {
         }
     }
     let mut skipped = std::collections::BTreeMap::new();
-    count_skipped(&mut skipped, "(no section)", outside_sections(&tags));
+    count_skipped(&mut skipped, "(no section)", outside_sections(tags));
     for s in &secs {
         match s.name.as_str() {
             "HEADER" => header(&s.tags, &mut d),
