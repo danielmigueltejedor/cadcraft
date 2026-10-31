@@ -77,10 +77,10 @@ fn tag(r: &RawTag) -> Tag {
         Kind::Real => v.parse::<f64>().ok().filter(|x| x.is_finite()).map(Value::Real),
         Kind::Int16 | Kind::Int32 | Kind::Int64 => v.parse::<i64>().ok().map(Value::Int),
         Kind::Bool => v.parse::<i64>().ok().map(|x| Value::Bool(x != 0)),
-        Kind::Hex => Some(Value::Hex(v.to_string())),
+        Kind::Hex => Some(Value::Hex(v.into())),
         Kind::Str => None,
     };
-    Tag::new(r.code, value.unwrap_or_else(|| Value::Str(r.value.clone())))
+    Tag::new(r.code, value.unwrap_or_else(|| Value::Str(r.value.clone().into_boxed_str())))
 }
 
 /// A handle value we believe: hexadecimal and not null. DXF handles are up to 16 hex digits and
